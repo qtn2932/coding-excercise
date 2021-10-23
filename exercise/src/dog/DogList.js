@@ -8,35 +8,30 @@ const DogList = () => {
 
     const [dogImages, setDogImages] = useState([])
     const [quotes, setQuotes] = useState([])
-    const [data, setData]= useState([])
 
     useEffect(() => {
-        const fetchData = async () => {
-            let dogs = await Axios.get(dogUrl)
-            let quote = await Axios.get(quoteUrl)
-            await setDogImages([...dogs.data.message])
-            await setQuotes([...quote.data.slice(0, 1000)])
-            const combineData = await quotes.map((obj,idx)=>{
-                return(
-                    {
-                        quote: obj.text,
-                        url: dogs.data.message[idx] 
-                    } 
-                )
-            })
-            console.log(combineData)
-            setData(combineData)
-        }
-        fetchData()
+        Axios.get(dogUrl).then(response => {
+            setDogImages([...response.data.message])
+        })
+        Axios.get(quoteUrl).then(response => {
+            const values = response.data.slice(0, 1001)
+            setQuotes(values)
+        })
     }, [])
-
-    const listOfDogCard = data.map((value, idx) => {
-        return (<DogCard url={value.url} quote={value.quote} key={idx} />)
-    })
 
     return (
         <div className="row">
-            {listOfDogCard}
+            {dogImages.map((url, idx) => {
+                if (quotes[idx]) {
+                    return (
+                        <DogCard url={url} quote={quotes[idx].text} key={idx} />
+                    )
+                }
+                else{
+                    return(<DogCard url={url} quote={""} key={idx}/>)
+                }
+
+            })}
         </div>
     )
 }
